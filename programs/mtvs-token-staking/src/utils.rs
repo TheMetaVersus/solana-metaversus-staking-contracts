@@ -1,15 +1,10 @@
+use crate::states::UserData;
 use anchor_lang::prelude::*;
-use solana_program::program::invoke_signed;
 
-// transfer sol
-pub fn sol_transfer_with_signer<'a>(
-    source: AccountInfo<'a>,
-    destination: AccountInfo<'a>,
-    system_program: AccountInfo<'a>,
-    signers: &[&[&[u8]]; 1],
-    amount: u64,
-) -> Result<()> {
-    /*let ix = solana_program::system_instruction::transfer(source.key, destination.key, amount);
-    invoke_signed(&ix, &[source, destination, system_program], signers)
-    */Ok(())
+pub fn calc_pending_reward(user_data: &UserData) -> Result<u64> {
+    // TODO: reward calculation
+
+    let rewards = user_data.pending_reward;
+
+    Ok(0)
 }

@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 
-pub mod instructions;
-pub mod states;
 pub mod constants;
 pub mod error;
+pub mod instructions;
+pub mod states;
 pub mod utils;
 
 use instructions::*;
@@ -34,5 +34,3 @@ pub mod mtvs_token_staking {
         claim_reward::handle(ctx)
     }
 }
-
-

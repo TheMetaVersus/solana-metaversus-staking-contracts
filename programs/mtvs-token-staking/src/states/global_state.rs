@@ -5,11 +5,12 @@ use anchor_lang::prelude::*;
 pub struct GlobalState {
     // admin
     pub authority: Pubkey,
-    // nft for verify
-    pub verify_nft_mint: Pubkey,
+    // nft creator for verify
+    pub verify_nft_creator: Pubkey,
     // token for staking
     pub mtvs_token_mint: Pubkey,
-    // pool token account address
-    pub pool_address: Pubkey,
+    // total staked user count
+    pub total_stake_user: u64,
+    // totally harvested rewards
+    pub total_harvested_reward: u64,
 }
-
