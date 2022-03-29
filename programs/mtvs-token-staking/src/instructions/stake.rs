@@ -3,7 +3,6 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use spl_token_metadata::{state::Metadata, ID as MetaProgramID};
 
-// validate NFT Collection and NFT ownership
 #[access_control(ctx.accounts.validate())]
 pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
@@ -55,6 +54,7 @@ pub struct Stake<'info> {
     pub nft_mint: Box<Account<'info, Mint>>,
 
     #[account(owner = MetaProgramID)]
+    /// CHECK: account check is in context validation
     pub nft_metadata: AccountInfo<'info>,
 
     #[account(
@@ -78,19 +78,32 @@ impl<'info> Stake<'info> {
             },
         )
     }
+
+    // validate NFT Collection and NFT ownership from metadata account 
     pub fn validate(&self) -> Result<()> {
         // Verify if user holds NFT
         require!(self.nft_token_acc.amount == 1, StakingError::NotNFTHolder);
 
+        // Verify Metadata Account Key
+        let (metadata_key, _) = Pubkey::find_program_address(
+            &[
+                b"metadata".as_ref(),
+                MetaProgramID.as_ref(),
+                self.nft_mint.key().as_ref(),
+            ],
+            &MetaProgramID,
+        );
+        require!(
+            metadata_key.eq(&self.nft_metadata.key()),
+            StakingError::IncorrectMetadata
+        );
         // Metadata of NFT
         let nft_meta: Metadata = Metadata::from_account_info(&self.nft_metadata)?;
-
         // Check mint key in metadata
         require!(
             nft_meta.mint.eq(&self.nft_mint.key()),
             StakingError::IncorrectMetadata
         );
-
         // Check update authority - NFT Collection
         require!(
             nft_meta
@@ -98,7 +111,6 @@ impl<'info> Stake<'info> {
                 .eq(&self.global_state.verify_nft_creator),
             StakingError::IncorrectMetadata
         );
-
         Ok(())
     }
 }
