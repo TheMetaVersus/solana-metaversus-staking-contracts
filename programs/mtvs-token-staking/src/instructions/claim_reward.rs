@@ -4,11 +4,6 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
-
-pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct ClaimReward<'info> {
     #[account(mut)]
@@ -43,9 +38,9 @@ pub struct ClaimReward<'info> {
 
     #[account(
       init_if_needed,
+      payer = user,
       associated_token::mint = mtvs_mint,
-      associated_token::authority = user,
-      payer = user
+      associated_token::authority = user
     )]
     pub mtvs_token_acc: Account<'info, TokenAccount>,
 
@@ -57,3 +52,29 @@ pub struct ClaimReward<'info> {
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
+
+impl<'info> ClaimReward<'info> {
+  fn claim_token_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+      CpiContext::new(
+          self.token_program.to_account_info(),
+          Transfer {
+              from: self.pool.to_account_info(),
+              to: self.mtvs_token_acc.to_account_info(),
+              authority: self.global_state.to_account_info(),
+          },
+      )
+  }
+}
+
+pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
+  let timestamp = Clock::get()?.unix_timestamp;
+
+  let accts = ctx.accounts;
+
+  accts.user_data.pending_reward = 0;
+  let reward_to_claim = calc_pending_reward(&accts.user_data).unwrap();
+
+  
+  Ok(())
+}
+

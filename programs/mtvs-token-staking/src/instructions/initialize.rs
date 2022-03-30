@@ -4,18 +4,6 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
-
-/// Initialize Staking Program for the first time
-/// to init global state with some data for validation
-///
-pub fn handle(ctx: Context<Initialize>) -> Result<()> {
-    let accts = ctx.accounts;
-    accts.global_state.authority = accts.authority.key();
-    accts.global_state.verify_nft_creator = accts.nft_creator.key();
-    accts.global_state.mtvs_token_mint = accts.mtvs_token_mint.key();
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(mut)]
@@ -47,4 +35,15 @@ pub struct Initialize<'info> {
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
+}
+
+/// Initialize Staking Program for the first time
+/// to init global state with some data for validation
+///
+pub fn handle(ctx: Context<Initialize>) -> Result<()> {
+    let accts = ctx.accounts;
+    accts.global_state.authority = accts.authority.key();
+    accts.global_state.verify_nft_creator = accts.nft_creator.key();
+    accts.global_state.mtvs_token_mint = accts.mtvs_token_mint.key();
+    Ok(())
 }

@@ -9,6 +9,8 @@ pub struct GlobalState {
     pub verify_nft_creator: Pubkey,
     // token for staking
     pub mtvs_token_mint: Pubkey,
+    // totally staked amount
+    pub total_staked_amount: u64,
     // total staked user count
     pub total_stake_user: u64,
     // totally harvested rewards

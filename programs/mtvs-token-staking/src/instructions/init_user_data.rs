@@ -5,16 +5,6 @@ use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
 
-/// Initialize User's Staking Data Account
-/// to save user's staking information.
-/// This should be unique per user
-pub fn handle(ctx: Context<InitUserData>) -> Result<()> {
-    let accts = ctx.accounts;
-    accts.user_data.user = accts.user.key();
-    accts.global_state.total_stake_user += 1;
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct InitUserData<'info> {
     #[account(mut)]
@@ -36,4 +26,14 @@ pub struct InitUserData<'info> {
     pub user_data: Account<'info, UserData>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
+}
+
+/// Initialize User's Staking Data Account
+/// to save user's staking information.
+/// This should be unique per user
+pub fn handle(ctx: Context<InitUserData>) -> Result<()> {
+    let accts = ctx.accounts;
+    accts.user_data.user = accts.user.key();
+    accts.global_state.total_stake_user += 1;
+    Ok(())
 }

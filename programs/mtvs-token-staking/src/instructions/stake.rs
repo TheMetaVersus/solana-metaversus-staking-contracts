@@ -3,30 +3,13 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use spl_token_metadata::{state::Metadata, ID as MetaProgramID};
 
-#[access_control(ctx.accounts.validate())]
-pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    let accts = ctx.accounts;
-
-    // Update staking information in user_data
-    accts.user_data.nft_mint = accts.nft_mint.key();
-    accts.user_data.amount = accts.user_data.amount.checked_add(amount).unwrap();
-    accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
-    accts.user_data.last_stake_time = timestamp as u64;
-
-    // transfer stake amount to pool
-    token::transfer(accts.stake_token_context(), amount)?;
-
-    Ok(())
-}
-
 #[derive(Accounts)]
 pub struct Stake<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
     #[account(
+        mut,
         seeds = [GLOBAL_STATE_SEED],
         bump,
     )]
@@ -79,7 +62,7 @@ impl<'info> Stake<'info> {
         )
     }
 
-    // validate NFT Collection and NFT ownership from metadata account 
+    // validate NFT Collection and NFT ownership from metadata account
     pub fn validate(&self) -> Result<()> {
         // Verify if user holds NFT
         require!(self.nft_token_acc.amount == 1, StakingError::NotNFTHolder);
@@ -113,4 +96,28 @@ impl<'info> Stake<'info> {
         );
         Ok(())
     }
+}
+
+#[access_control(ctx.accounts.validate())]
+pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
+    let timestamp = Clock::get()?.unix_timestamp;
+
+    let accts = ctx.accounts;
+
+    // Update staking information in user_data
+    accts.user_data.nft_mint = accts.nft_mint.key();
+    accts.user_data.amount = accts.user_data.amount.checked_add(amount).unwrap();
+    accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
+    accts.user_data.last_stake_time = timestamp as u64;
+
+    // Update totally staked amount in global_state
+    accts.global_state.total_staked_amount = accts
+        .global_state
+        .total_staked_amount
+        .checked_add(amount)
+        .unwrap();
+    // transfer stake amount to pool
+    token::transfer(accts.stake_token_context(), amount)?;
+
+    Ok(())
 }

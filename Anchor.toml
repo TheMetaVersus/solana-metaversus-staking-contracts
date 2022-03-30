@@ -1,5 +1,6 @@
 [features]
 seeds = false
+
 [programs.localnet]
 mtvs_token_staking = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
