@@ -42,7 +42,7 @@ pub struct ClaimReward<'info> {
       associated_token::mint = mtvs_mint,
       associated_token::authority = user
     )]
-    pub mtvs_token_acc: Account<'info, TokenAccount>,
+    pub reward_token_acc: Account<'info, TokenAccount>,
 
     #[account(address = global_state.mtvs_token_mint)]
     pub mtvs_mint: Account<'info, Mint>,
@@ -54,27 +54,45 @@ pub struct ClaimReward<'info> {
 }
 
 impl<'info> ClaimReward<'info> {
-  fn claim_token_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
-      CpiContext::new(
-          self.token_program.to_account_info(),
-          Transfer {
-              from: self.pool.to_account_info(),
-              to: self.mtvs_token_acc.to_account_info(),
-              authority: self.global_state.to_account_info(),
-          },
-      )
-  }
+    fn claim_token_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.pool.to_account_info(),
+                to: self.reward_token_acc.to_account_info(),
+                authority: self.global_state.to_account_info(),
+            },
+        )
+    }
 }
 
 pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
-  let timestamp = Clock::get()?.unix_timestamp;
+    let timestamp = Clock::get()?.unix_timestamp;
 
-  let accts = ctx.accounts;
+    let accts = ctx.accounts;
 
-  accts.user_data.pending_reward = 0;
-  let reward_to_claim = calc_pending_reward(&accts.user_data).unwrap();
+    // update user data: make pending reward as 0 and update changeTime
+    accts.user_data.pending_reward = 0;
+    accts.user_data.last_reward_time = timestamp as u64;
 
-  
-  Ok(())
+    // reward to claim now
+    let reward_to_claim = calc_pending_reward(&accts.user_data).unwrap();
+
+    // update total harvested reward in global state
+    accts.global_state.total_harvested_reward = accts
+        .global_state
+        .total_harvested_reward
+        .checked_add(reward_to_claim)
+        .unwrap();
+
+    // transfer reward from pool to user
+    let bump = ctx.bumps.get("global_state").unwrap();
+    // global_state is owner of pool account, so it's seeds should be signer
+    token::transfer(
+        accts
+            .claim_token_context()
+            .with_signer(&[&[GLOBAL_STATE_SEED.as_ref(), &[*bump]]]),
+        reward_to_claim,
+    )?;
+    Ok(())
 }
-

@@ -1,9 +1,5 @@
 use crate::{constants::*, states::*};
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount, Transfer},
-};
 
 #[derive(Accounts)]
 pub struct InitUserData<'info> {
@@ -33,7 +29,9 @@ pub struct InitUserData<'info> {
 /// This should be unique per user
 pub fn handle(ctx: Context<InitUserData>) -> Result<()> {
     let accts = ctx.accounts;
+
     accts.user_data.user = accts.user.key();
+    // update totally staked user count
     accts.global_state.total_stake_user += 1;
     Ok(())
 }

@@ -12,5 +12,11 @@ pub struct UserData {
     // rewards will be charged
     pub pending_reward: u64,
     // last stake amount change time
-    pub last_stake_time: u64,
+    pub last_reward_time: u64,
+}
+
+impl UserData {
+    pub fn calc_pending_reward(&self) -> Result<u64> {
+        Ok(0)
+    }
 }

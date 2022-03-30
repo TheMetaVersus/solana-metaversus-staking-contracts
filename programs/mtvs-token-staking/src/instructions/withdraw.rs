@@ -66,7 +66,7 @@ pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
     accts.user_data.nft_mint = accts.nft_mint.key();
     accts.user_data.amount = accts.user_data.amount.checked_sub(amount).unwrap();
     accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
-    accts.user_data.last_stake_time = timestamp as u64;
+    accts.user_data.last_reward_time = timestamp as u64;
 
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
