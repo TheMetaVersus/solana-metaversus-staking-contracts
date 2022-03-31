@@ -1,4 +1,4 @@
-use crate::{constants::*, error::*, states::*, utils::*};
+use crate::{constants::*, error::*, states::*, utils::*, instructions::*};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
@@ -27,12 +27,7 @@ pub struct Withdraw<'info> {
     )]
     pub user_data: Account<'info, UserData>,
 
-    #[account(
-        constraint = nft_token_acc.mint == nft_mint.key(),
-        constraint = nft_token_acc.owner == user.key()
-    )]
-    pub nft_token_acc: Account<'info, TokenAccount>,
-    pub nft_mint: Account<'info, Mint>,
+    pub nft_hold: NftHold<'info>,
 
     #[account(
         mut,
@@ -55,15 +50,20 @@ impl<'info> Withdraw<'info> {
             },
         )
     }
+    fn validate(&self) -> Result<()> {
+        self.nft_hold.validate(self.user.key(), self.global_state.verify_nft_creator)?;
+        Ok(())
+    }
 }
 
+#[access_control(ctx.accounts.validate())]
 pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
     let accts = ctx.accounts;
 
     // Update staking information in user_data
-    accts.user_data.nft_mint = accts.nft_mint.key();
+    accts.user_data.nft_mint = accts.nft_hold.nft_mint.key();
     accts.user_data.amount = accts.user_data.amount.checked_sub(amount).unwrap();
     accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
     accts.user_data.last_reward_time = timestamp as u64;

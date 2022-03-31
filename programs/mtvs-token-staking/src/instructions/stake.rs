@@ -29,16 +29,7 @@ pub struct Stake<'info> {
     )]
     pub user_data: Box<Account<'info, UserData>>,
 
-    #[account(
-        constraint = nft_token_acc.mint == nft_mint.key(),
-        constraint = nft_token_acc.owner == user.key()
-    )]
-    pub nft_token_acc: Box<Account<'info, TokenAccount>>,
-    pub nft_mint: Box<Account<'info, Mint>>,
-
-    #[account(owner = MetaProgramID)]
-    /// CHECK: account check is in context validation
-    pub nft_metadata: AccountInfo<'info>,
+    pub nft_hold: NftHold<'info>,
 
     #[account(
         mut,
@@ -50,22 +41,23 @@ pub struct Stake<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-impl<'info> Stake<'info> {
-    fn stake_token_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
-        CpiContext::new(
-            self.token_program.to_account_info(),
-            Transfer {
-                from: self.mtvs_token_acc.to_account_info(),
-                to: self.pool.to_account_info(),
-                authority: self.user.to_account_info(),
-            },
-        )
-    }
+#[derive(Accounts)]
+pub struct NftHold<'info> {
+    #[account(
+        constraint = nft_token_acc.mint == nft_mint.key()
+    )]
+    pub nft_token_acc: Box<Account<'info, TokenAccount>>,
+    pub nft_mint: Box<Account<'info, Mint>>,
 
-    // validate NFT Collection and NFT ownership from metadata account
-    pub fn validate(&self) -> Result<()> {
+    #[account(owner = MetaProgramID)]
+    /// CHECK: account check is in context validation
+    pub nft_metadata: AccountInfo<'info>,
+}
+
+impl<'info> NftHold<'info> {
+    pub fn validate(&self, owner: Pubkey, creator: Pubkey) -> Result<()> {
         // Verify if user holds NFT
-        require!(self.nft_token_acc.amount == 1, StakingError::NotNFTHolder);
+        require!(self.nft_token_acc.owner.eq(&owner) && self.nft_token_acc.amount == 1, StakingError::NotNFTHolder);
 
         // Verify Metadata Account Key
         let (metadata_key, _) = Pubkey::find_program_address(
@@ -91,9 +83,27 @@ impl<'info> Stake<'info> {
         require!(
             nft_meta
                 .update_authority
-                .eq(&self.global_state.verify_nft_creator),
+                .eq(&creator),
             StakingError::IncorrectMetadata
         );
+        Ok(())
+    }
+}
+impl<'info> Stake<'info> {
+    fn stake_token_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.mtvs_token_acc.to_account_info(),
+                to: self.pool.to_account_info(),
+                authority: self.user.to_account_info(),
+            },
+        )
+    }
+
+    // validate NFT Collection and NFT ownership from metadata account
+    pub fn validate(&self) -> Result<()> {
+        self.nft_hold.validate(self.user.key(), self.global_state.verify_nft_creator)?;
         Ok(())
     }
 }
@@ -105,7 +115,7 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
     let accts = ctx.accounts;
 
     // Update staking information in user_data
-    accts.user_data.nft_mint = accts.nft_mint.key();
+    accts.user_data.nft_mint = accts.nft_hold.nft_mint.key();
     accts.user_data.amount = accts.user_data.amount.checked_add(amount).unwrap();
     accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
     accts.user_data.last_reward_time = timestamp as u64;
