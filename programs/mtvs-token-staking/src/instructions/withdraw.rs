@@ -1,4 +1,4 @@
-use crate::{constants::*, error::*, states::*, utils::*, instructions::*};
+use crate::{constants::*, error::*, instructions::*, states::*, utils::*};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
@@ -8,6 +8,7 @@ pub struct Withdraw<'info> {
     pub user: Signer<'info>,
 
     #[account(
+        mut,
         seeds = [GLOBAL_STATE_SEED],
         bump,
     )]
@@ -21,6 +22,7 @@ pub struct Withdraw<'info> {
     pub pool: Account<'info, TokenAccount>,
 
     #[account(
+        mut,
         seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
         bump,
         has_one = user
@@ -51,7 +53,8 @@ impl<'info> Withdraw<'info> {
         )
     }
     fn validate(&self) -> Result<()> {
-        self.nft_hold.validate(self.user.key(), self.global_state.verify_nft_creator)?;
+        self.nft_hold
+            .validate(self.user.key(), self.global_state.verify_nft_creator)?;
         Ok(())
     }
 }

@@ -27,6 +27,16 @@ pub struct Initialize<'info> {
     )]
     pub pool: Account<'info, TokenAccount>,
 
+    #[account(
+        init,
+        seeds = [REWARD_POOL_SEED],
+        bump,
+        token::mint = mtvs_token_mint,
+        token::authority = global_state,
+        payer = authority
+    )]
+    pub reward_pool: Account<'info, TokenAccount>,
+
     /// CHECK: This should a nft creator address.
     /// Can be both system account and or candy machine pda
     pub nft_creator: AccountInfo<'info>,

@@ -1,4 +1,4 @@
-use crate::{constants::*, error::*, states::*, utils::*, instructions::*};
+use crate::{constants::*, error::*, instructions::*, states::*, utils::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -10,6 +10,7 @@ pub struct ClaimReward<'info> {
     pub user: Signer<'info>,
 
     #[account(
+      mut,
       seeds = [GLOBAL_STATE_SEED],
       bump,
     )]
@@ -17,12 +18,13 @@ pub struct ClaimReward<'info> {
 
     #[account(
       mut,
-      seeds = [POOL_SEED],
+      seeds = [REWARD_POOL_SEED],
       bump
     )]
-    pub pool: Account<'info, TokenAccount>,
+    pub reward_pool: Account<'info, TokenAccount>,
 
     #[account(
+      mut,
       seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
       bump,
       has_one = user
@@ -53,15 +55,16 @@ impl<'info> ClaimReward<'info> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
-                from: self.pool.to_account_info(),
+                from: self.reward_pool.to_account_info(),
                 to: self.reward_token_acc.to_account_info(),
                 authority: self.global_state.to_account_info(),
             },
         )
     }
     fn validate(&self) -> Result<()> {
-      self.nft_hold.validate(self.user.key(), self.global_state.verify_nft_creator)?;
-      Ok(())
+        self.nft_hold
+            .validate(self.user.key(), self.global_state.verify_nft_creator)?;
+        Ok(())
     }
 }
 

@@ -23,6 +23,7 @@ pub struct Stake<'info> {
     pub pool: Box<Account<'info, TokenAccount>>,
 
     #[account(
+        mut,
         seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
         bump,
         has_one = user
@@ -57,7 +58,10 @@ pub struct NftHold<'info> {
 impl<'info> NftHold<'info> {
     pub fn validate(&self, owner: Pubkey, creator: Pubkey) -> Result<()> {
         // Verify if user holds NFT
-        require!(self.nft_token_acc.owner.eq(&owner) && self.nft_token_acc.amount == 1, StakingError::NotNFTHolder);
+        require!(
+            self.nft_token_acc.owner.eq(&owner) && self.nft_token_acc.amount == 1,
+            StakingError::NotNFTHolder
+        );
 
         // Verify Metadata Account Key
         let (metadata_key, _) = Pubkey::find_program_address(
@@ -81,9 +85,7 @@ impl<'info> NftHold<'info> {
         );
         // Check update authority - NFT Collection
         require!(
-            nft_meta
-                .update_authority
-                .eq(&creator),
+            nft_meta.update_authority.eq(&creator),
             StakingError::IncorrectMetadata
         );
         Ok(())
@@ -103,7 +105,8 @@ impl<'info> Stake<'info> {
 
     // validate NFT Collection and NFT ownership from metadata account
     pub fn validate(&self) -> Result<()> {
-        self.nft_hold.validate(self.user.key(), self.global_state.verify_nft_creator)?;
+        self.nft_hold
+            .validate(self.user.key(), self.global_state.verify_nft_creator)?;
         Ok(())
     }
 }
