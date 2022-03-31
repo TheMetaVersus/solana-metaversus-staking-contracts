@@ -6,7 +6,8 @@ describe("mtvs-token-staking", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
 
-  const program = anchor.workspace.MtvsTokenStaking as Program<MtvsTokenStaking>;
+  const program = anchor.workspace
+    .MtvsTokenStaking as Program<MtvsTokenStaking>;
 
   it("Is initialized!", async () => {
     // Add your test here.
