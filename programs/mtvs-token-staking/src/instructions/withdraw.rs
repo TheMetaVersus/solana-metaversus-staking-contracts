@@ -1,7 +1,9 @@
 use crate::{constants::*, error::*, instructions::*, states::*, utils::*};
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
-
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{self, Mint, Token, TokenAccount, Transfer},
+};
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
     #[account(mut)]
@@ -32,13 +34,20 @@ pub struct Withdraw<'info> {
     pub nft_hold: NftHold<'info>,
 
     #[account(
-        mut,
-        constraint = mtvs_token_acc.mint == global_state.mtvs_token_mint,
-        constraint = mtvs_token_acc.owner == user.key()
+        init_if_needed,
+        payer = user,
+        associated_token::mint = mtvs_mint,
+        associated_token::authority = user
     )]
     pub mtvs_token_acc: Account<'info, TokenAccount>,
 
+    #[account(address = global_state.mtvs_token_mint)]
+    pub mtvs_mint: Account<'info, Mint>,
+
     pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> Withdraw<'info> {
@@ -61,6 +70,7 @@ impl<'info> Withdraw<'info> {
 
 #[access_control(ctx.accounts.validate())]
 pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+    // todo: add claim here
     let timestamp = Clock::get()?.unix_timestamp;
 
     let accts = ctx.accounts;

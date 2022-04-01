@@ -1,5 +1,4 @@
 import { PublicKey } from "@solana/web3.js";
-import * as anchor from "@project-serum/anchor";
 import {
   GLOBAL_STATE_SEED,
   USER_STAKING_DATA_SEED,
@@ -7,12 +6,9 @@ import {
   REWARD_POOL_SEED,
 } from "./constants";
 import { asyncGetPda } from "./utils";
+import { getProgram } from '../program';
 
-import { MtvsTokenStaking } from "../../target/types/mtvs_token_staking";
-
-const program = anchor.workspace
-  .MtvsTokenStaking as anchor.Program<MtvsTokenStaking>;
-
+const program = getProgram();
 export const getGlobalStateKey = async () => {
   const [globalStateKey] = await asyncGetPda(
     [Buffer.from(GLOBAL_STATE_SEED)],
