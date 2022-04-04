@@ -1,7 +1,7 @@
 use crate::{constants::*, error::*, states::*};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
-use spl_token_metadata::{state::Metadata, ID as MetaProgramID};
+use spl_token_metadata::{state::Metadata, ID as MetadataProgramID};
 
 #[derive(Accounts)]
 pub struct Stake<'info> {
@@ -55,7 +55,7 @@ pub struct NftHold<'info> {
     pub nft_token_acc: Box<Account<'info, TokenAccount>>,
     pub nft_mint: Box<Account<'info, Mint>>,
 
-    #[account(owner = MetaProgramID)]
+    #[account(owner = MetadataProgramID)]
     /// CHECK: account check is in context validation
     pub nft_metadata: AccountInfo<'info>,
 }
@@ -72,10 +72,10 @@ impl<'info> NftHold<'info> {
         let (metadata_key, _) = Pubkey::find_program_address(
             &[
                 b"metadata".as_ref(),
-                MetaProgramID.as_ref(),
+                MetadataProgramID.as_ref(),
                 self.nft_mint.key().as_ref(),
             ],
-            &MetaProgramID,
+            &MetadataProgramID,
         );
         require!(
             metadata_key.eq(&self.nft_metadata.key()),
@@ -88,11 +88,21 @@ impl<'info> NftHold<'info> {
             nft_meta.mint.eq(&self.nft_mint.key()),
             StakingError::IncorrectMetadata
         );
-        // Check update authority - NFT Collection
+        
+        /*// Check update authority - NFT Collection
         require!(
             nft_meta.update_authority.eq(&creator),
             StakingError::IncorrectMetadata
-        );
+        );*/
+        
+        // check verified creator in creators list
+        let creators = nft_meta.data.creators.unwrap();
+        let verified_creator = creators.iter().find(|&c| c.verified == true);
+        if verified_creator.is_none() {
+            return Err(error!(StakingError::IncorrectMetadata));
+        }
+        require!(verified_creator.unwrap().address.eq(&creator), StakingError::IncorrectMetadata);
+        
         Ok(())
     }
 }

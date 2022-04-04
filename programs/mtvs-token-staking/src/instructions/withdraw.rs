@@ -88,6 +88,9 @@ pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         .total_staked_amount
         .checked_sub(amount)
         .unwrap();
+    
+    // Update card count
+    accts.global_state.total_stake_card -= 1;
 
     // transfer stake amount to pool
     let bump = ctx.bumps.get("global_state").unwrap();
