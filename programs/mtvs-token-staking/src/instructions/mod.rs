@@ -1,9 +1,6 @@
 pub mod initialize;
 pub use initialize::*;
 
-pub mod init_user_data;
-pub use init_user_data::*;
-
 pub mod stake;
 pub use stake::*;
 

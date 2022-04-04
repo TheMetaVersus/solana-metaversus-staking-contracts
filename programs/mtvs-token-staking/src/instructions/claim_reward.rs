@@ -1,4 +1,4 @@
-use crate::{constants::*, error::*, instructions::*, states::*, utils::*};
+use crate::{constants::*, error::*, instructions::*, states::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -25,7 +25,7 @@ pub struct ClaimReward<'info> {
 
     #[account(
       mut,
-      seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
+      seeds = [USER_STAKING_DATA_SEED, user_data.seed_key.as_ref(), user.key().as_ref()],
       bump,
       has_one = user
     )]
@@ -74,17 +74,17 @@ pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
 
     let accts = ctx.accounts;
 
+    // reward to claim now
+    let reward_to_claim = accts.user_data.calc_rewards().unwrap();
+
     // update user data: make pending reward as 0 and update changeTime
-    accts.user_data.pending_reward = 0;
+    accts.user_data.claimed_reward = accts.user_data.claimed_reward.checked_add(reward_to_claim).unwrap();
     accts.user_data.last_reward_time = timestamp as u64;
 
-    // reward to claim now
-    let reward_to_claim = calc_pending_reward(&accts.user_data).unwrap();
-
     // update total harvested reward in global state
-    accts.global_state.total_harvested_reward = accts
+    accts.global_state.total_claimed_reward = accts
         .global_state
-        .total_harvested_reward
+        .total_claimed_reward
         .checked_add(reward_to_claim)
         .unwrap();
 

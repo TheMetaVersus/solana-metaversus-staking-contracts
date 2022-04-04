@@ -4,7 +4,6 @@ pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod states;
-pub mod utils;
 
 use instructions::*;
 
@@ -16,10 +15,6 @@ pub mod mtvs_token_staking {
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         initialize::handle(ctx)
-    }
-
-    pub fn init_user_data(ctx: Context<InitUserData>) -> Result<()> {
-        init_user_data::handle(ctx)
     }
 
     pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {

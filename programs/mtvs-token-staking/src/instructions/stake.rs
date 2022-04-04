@@ -1,4 +1,4 @@
-use crate::{constants::*, error::*, states::*, utils::*};
+use crate::{constants::*, error::*, states::*};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use spl_token_metadata::{state::Metadata, ID as MetaProgramID};
@@ -23,12 +23,15 @@ pub struct Stake<'info> {
     pub pool: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        mut,
-        seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
+        init,
+        seeds = [USER_STAKING_DATA_SEED, data_seed.key().as_ref(), user.key().as_ref()],
         bump,
-        has_one = user
+        payer = user
     )]
     pub user_data: Box<Account<'info, UserData>>,
+
+    /// CHECK: This is a random keypair for generating user_data
+    pub data_seed: AccountInfo<'info>,
 
     pub nft_hold: NftHold<'info>,
 
@@ -40,6 +43,8 @@ pub struct Stake<'info> {
     pub mtvs_token_acc: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 #[derive(Accounts)]
@@ -117,11 +122,12 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
 
     let accts = ctx.accounts;
 
-    // Update staking information in user_data
+    // Init staking information in user_data
+    accts.user_data.user = accts.user.key();
     accts.user_data.nft_mint = accts.nft_hold.nft_mint.key();
-    accts.user_data.amount = accts.user_data.amount.checked_add(amount).unwrap();
-    accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
+    accts.user_data.amount = amount;
     accts.user_data.last_reward_time = timestamp as u64;
+    accts.user_data.seed_key = accts.data_seed.key();
 
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
@@ -129,6 +135,8 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
         .total_staked_amount
         .checked_add(amount)
         .unwrap();
+    // Update totally staked card in global_state
+    accts.global_state.total_stake_card += 1;
     // transfer stake amount to pool
     token::transfer(accts.stake_token_context(), amount)?;
 

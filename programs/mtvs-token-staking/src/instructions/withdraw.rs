@@ -1,11 +1,18 @@
-use crate::{constants::*, error::*, instructions::*, states::*, utils::*};
+use crate::{constants::*, error::*, instructions::*, states::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Mint, Token, TokenAccount, Transfer},
 };
+/// UserData Account will be closed when user withdraws tokens.
+/// All lamports will go to super_authority wallet
+/// In withdraw function, there is no claim part. 
+/// so Claim Instruction should be prior to Withdraw instruction
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
+    #[account(mut, address = global_state.authority)]
+    pub super_authority: SystemAccount<'info>,
+
     #[account(mut)]
     pub user: Signer<'info>,
 
@@ -25,9 +32,10 @@ pub struct Withdraw<'info> {
 
     #[account(
         mut,
-        seeds = [USER_STAKING_DATA_SEED, user.key().as_ref()],
+        seeds = [USER_STAKING_DATA_SEED, user_data.seed_key.as_ref(), user.key().as_ref()],
         bump,
-        has_one = user
+        has_one = user,
+        close = super_authority
     )]
     pub user_data: Account<'info, UserData>,
 
@@ -70,17 +78,10 @@ impl<'info> Withdraw<'info> {
 
 #[access_control(ctx.accounts.validate())]
 pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-    // todo: add claim here
     let timestamp = Clock::get()?.unix_timestamp;
 
     let accts = ctx.accounts;
-
-    // Update staking information in user_data
-    accts.user_data.nft_mint = accts.nft_hold.nft_mint.key();
-    accts.user_data.amount = accts.user_data.amount.checked_sub(amount).unwrap();
-    accts.user_data.pending_reward = calc_pending_reward(&accts.user_data).unwrap();
-    accts.user_data.last_reward_time = timestamp as u64;
-
+    
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
         .global_state
@@ -90,6 +91,7 @@ pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
 
     // transfer stake amount to pool
     let bump = ctx.bumps.get("global_state").unwrap();
+
     // global_state is owner of pool account, so it's seeds should be signer
     token::transfer(
         accts

@@ -11,8 +11,13 @@ pub struct GlobalState {
     pub mtvs_token_mint: Pubkey,
     // totally staked amount
     pub total_staked_amount: u64,
-    // total staked user count
-    pub total_stake_user: u64,
+    // total staked card count
+    pub total_stake_card: u64,
     // totally harvested rewards
-    pub total_harvested_reward: u64,
+    pub total_claimed_reward: u64,
+
+    // Rewards per tier
+    pub tier_percent: [u16; 10],
+    pub tier_max_days: [u16; 10],
+    pub available_tier: u8
 }
