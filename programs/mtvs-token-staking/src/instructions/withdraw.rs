@@ -6,7 +6,7 @@ use anchor_spl::{
 };
 /// UserData Account will be closed when user withdraws tokens.
 /// All lamports will go to super_authority wallet
-/// In withdraw function, there is no claim part. 
+/// In withdraw function, there is no claim part.
 /// so Claim Instruction should be prior to Withdraw instruction
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
@@ -47,7 +47,7 @@ pub struct Withdraw<'info> {
         associated_token::mint = mtvs_mint,
         associated_token::authority = user
     )]
-    pub mtvs_token_acc: Account<'info, TokenAccount>,
+    pub user_mtvs_ata: Account<'info, TokenAccount>,
 
     #[account(address = global_state.mtvs_token_mint)]
     pub mtvs_mint: Account<'info, Mint>,
@@ -64,7 +64,7 @@ impl<'info> Withdraw<'info> {
             self.token_program.to_account_info(),
             Transfer {
                 from: self.pool.to_account_info(),
-                to: self.mtvs_token_acc.to_account_info(),
+                to: self.user_mtvs_ata.to_account_info(),
                 authority: self.global_state.to_account_info(),
             },
         )
@@ -81,14 +81,14 @@ pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
     let accts = ctx.accounts;
-    
+
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
         .global_state
         .total_staked_amount
         .checked_sub(amount)
         .unwrap();
-    
+
     // Update card count
     accts.global_state.total_stake_card -= 1;
 

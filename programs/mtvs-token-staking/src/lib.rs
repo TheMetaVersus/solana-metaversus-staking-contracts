@@ -13,8 +13,20 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod mtvs_token_staking {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handle(ctx)
+    pub fn initialize(
+        ctx: Context<Initialize>,
+        new_authority: Pubkey,
+        tier_max_days: [u16; 10],
+        tier_percent: [u16; 10],
+        available_tier: u8,
+    ) -> Result<()> {
+        initialize::handle(
+            ctx,
+            new_authority,
+            tier_max_days,
+            tier_percent,
+            available_tier,
+        )
     }
 
     pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {

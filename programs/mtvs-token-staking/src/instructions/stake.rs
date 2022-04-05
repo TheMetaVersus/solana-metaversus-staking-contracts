@@ -1,6 +1,9 @@
 use crate::{constants::*, error::*, states::*};
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{self, Mint, Token, TokenAccount, Transfer},
+};
 use spl_token_metadata::{state::Metadata, ID as MetadataProgramID};
 
 #[derive(Accounts)]
@@ -36,14 +39,19 @@ pub struct Stake<'info> {
     pub nft_hold: NftHold<'info>,
 
     #[account(
-        mut,
-        constraint = mtvs_token_acc.mint == global_state.mtvs_token_mint,
-        constraint = mtvs_token_acc.owner == user.key()
+        init_if_needed,
+        payer = user,
+        associated_token::mint = mtvs_mint,
+        associated_token::authority = user
     )]
-    pub mtvs_token_acc: Box<Account<'info, TokenAccount>>,
+    pub user_mtvs_ata: Box<Account<'info, TokenAccount>>,
+
+    #[account(address = global_state.mtvs_token_mint)]
+    pub mtvs_mint: Account<'info, Mint>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -88,21 +96,24 @@ impl<'info> NftHold<'info> {
             nft_meta.mint.eq(&self.nft_mint.key()),
             StakingError::IncorrectMetadata
         );
-        
+
         /*// Check update authority - NFT Collection
         require!(
             nft_meta.update_authority.eq(&creator),
             StakingError::IncorrectMetadata
         );*/
-        
+
         // check verified creator in creators list
         let creators = nft_meta.data.creators.unwrap();
         let verified_creator = creators.iter().find(|&c| c.verified == true);
         if verified_creator.is_none() {
             return Err(error!(StakingError::IncorrectMetadata));
         }
-        require!(verified_creator.unwrap().address.eq(&creator), StakingError::IncorrectMetadata);
-        
+        require!(
+            verified_creator.unwrap().address.eq(&creator),
+            StakingError::IncorrectMetadata
+        );
+
         Ok(())
     }
 }
@@ -111,7 +122,7 @@ impl<'info> Stake<'info> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
-                from: self.mtvs_token_acc.to_account_info(),
+                from: self.user_mtvs_ata.to_account_info(),
                 to: self.pool.to_account_info(),
                 authority: self.user.to_account_info(),
             },
@@ -136,6 +147,7 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
     accts.user_data.user = accts.user.key();
     accts.user_data.nft_mint = accts.nft_hold.nft_mint.key();
     accts.user_data.amount = amount;
+    accts.user_data.staked_time = timestamp as u64;
     accts.user_data.last_reward_time = timestamp as u64;
     accts.user_data.seed_key = accts.data_seed.key();
 

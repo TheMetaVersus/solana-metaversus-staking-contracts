@@ -75,10 +75,14 @@ pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
     let accts = ctx.accounts;
 
     // reward to claim now
-    let reward_to_claim = accts.user_data.calc_rewards().unwrap();
+    let reward_to_claim = accts.user_data.calc_rewards(&accts.global_state).unwrap();
 
     // update user data: make pending reward as 0 and update changeTime
-    accts.user_data.claimed_reward = accts.user_data.claimed_reward.checked_add(reward_to_claim).unwrap();
+    accts.user_data.claimed_reward = accts
+        .user_data
+        .claimed_reward
+        .checked_add(reward_to_claim as u128)
+        .unwrap();
     accts.user_data.last_reward_time = timestamp as u64;
 
     // update total harvested reward in global state
