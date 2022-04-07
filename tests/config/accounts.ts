@@ -20,13 +20,14 @@ import {
   getRewardPoolKey,
   getUserDataKey
 } from '../utils/keys';
+import { getMetadata } from '../nft/metadata';
 import { MtvsTokenStaking } from '../../target/types/mtvs_token_staking';
+import { User } from './users';
 const program = anchor.workspace.MtvsTokenStaking as anchor.Program<MtvsTokenStaking>;
 
 export class BaseAcct {
   public publicKey: PublicKey;
 }
-
 export class TokenAcc extends BaseAcct {
   public mint: PublicKey;
   public owner: PublicKey;
@@ -46,6 +47,12 @@ export class TokenAcc extends BaseAcct {
   // todo: add getbalance
 }
 
+export class NFTtokenAcc extends TokenAcc {
+  public metadata: PublicKey;
+  public async setMetadata() {
+    this.metadata = new PublicKey(await getMetadata(this.mint.toString()));
+  }
+}
 export class ATA extends TokenAcc {
   public async initTokenAccount(owner: Keypair, mint: PublicKey, provider?: anchor.Provider): Promise<void> {
     this.mint = mint;
@@ -73,6 +80,17 @@ export class MintAcc extends BaseAcct {
       authority,
       null,
       decimals
+    );
+  }
+  public async mintTokens(provider: anchor.Provider, payer: Keypair, toTokenAcc: PublicKey, amount: number) {
+    console.log('toTokenAcc =', toTokenAcc.toBase58());
+    await mintTo(
+      provider.connection,
+      payer,
+      this.publicKey,
+      toTokenAcc,
+      payer,
+      amount
     );
   }
 }

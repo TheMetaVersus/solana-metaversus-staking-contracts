@@ -21,14 +21,14 @@ pub struct Withdraw<'info> {
         seeds = [GLOBAL_STATE_SEED],
         bump,
     )]
-    pub global_state: Account<'info, GlobalState>,
+    pub global_state: Box<Account<'info, GlobalState>>,
 
     #[account(
         mut,
         seeds = [POOL_SEED],
         bump
     )]
-    pub pool: Account<'info, TokenAccount>,
+    pub pool: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -37,7 +37,7 @@ pub struct Withdraw<'info> {
         has_one = user,
         close = super_authority
     )]
-    pub user_data: Account<'info, UserData>,
+    pub user_data: Box<Account<'info, UserData>>,
 
     pub nft_hold: NftHold<'info>,
 
@@ -47,10 +47,10 @@ pub struct Withdraw<'info> {
         associated_token::mint = mtvs_mint,
         associated_token::authority = user
     )]
-    pub user_mtvs_ata: Account<'info, TokenAccount>,
+    pub user_mtvs_ata: Box<Account<'info, TokenAccount>>,
 
     #[account(address = global_state.mtvs_token_mint)]
-    pub mtvs_mint: Account<'info, Mint>,
+    pub mtvs_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -77,11 +77,9 @@ impl<'info> Withdraw<'info> {
 }
 
 #[access_control(ctx.accounts.validate())]
-pub fn handle(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-    let timestamp = Clock::get()?.unix_timestamp;
-
+pub fn handle(ctx: Context<Withdraw>) -> Result<()> {
     let accts = ctx.accounts;
-
+    let amount = accts.user_data.amount;
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
         .global_state

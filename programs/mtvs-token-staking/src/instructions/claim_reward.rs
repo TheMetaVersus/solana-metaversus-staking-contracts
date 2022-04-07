@@ -14,14 +14,14 @@ pub struct ClaimReward<'info> {
       seeds = [GLOBAL_STATE_SEED],
       bump,
     )]
-    pub global_state: Account<'info, GlobalState>,
+    pub global_state: Box<Account<'info, GlobalState>>,
 
     #[account(
       mut,
       seeds = [REWARD_POOL_SEED],
       bump
     )]
-    pub reward_pool: Account<'info, TokenAccount>,
+    pub reward_pool: Box<Account<'info, TokenAccount>>,
 
     #[account(
       mut,
@@ -29,7 +29,7 @@ pub struct ClaimReward<'info> {
       bump,
       has_one = user
     )]
-    pub user_data: Account<'info, UserData>,
+    pub user_data: Box<Account<'info, UserData>>,
 
     pub nft_hold: NftHold<'info>,
 
@@ -39,10 +39,10 @@ pub struct ClaimReward<'info> {
       associated_token::mint = mtvs_mint,
       associated_token::authority = user
     )]
-    pub reward_token_acc: Account<'info, TokenAccount>,
+    pub reward_token_acc: Box<Account<'info, TokenAccount>>,
 
     #[account(address = global_state.mtvs_token_mint)]
-    pub mtvs_mint: Account<'info, Mint>,
+    pub mtvs_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,

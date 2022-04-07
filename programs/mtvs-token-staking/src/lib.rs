@@ -33,8 +33,8 @@ pub mod mtvs_token_staking {
         stake::handle(ctx, amount)
     }
 
-    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-        withdraw::handle(ctx, amount)
+    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
+        withdraw::handle(ctx)
     }
 
     pub fn claim_reward(ctx: Context<ClaimReward>) -> Result<()> {

@@ -33,9 +33,9 @@ export const getRewardPoolKey = async () => {
   return rewardPoolKey;
 };
 
-export const getUserDataKey = async (userKey: PublicKey) => {
+export const getUserDataKey = async (userKey: PublicKey, seedKey: PublicKey) => {
   const [userDataKey] = await asyncGetPda(
-    [Buffer.from(USER_STAKING_DATA_SEED), userKey.toBuffer()],
+    [Buffer.from(USER_STAKING_DATA_SEED), seedKey.toBuffer(), userKey.toBuffer()],
     program.programId
   );
   return userDataKey;

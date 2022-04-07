@@ -77,6 +77,7 @@ pub fn handle(
     accts.global_state.mtvs_token_mint = accts.mtvs_token_mint.key();
     accts.global_state.tier_max_days = tier_max_days;
     accts.global_state.tier_percent = tier_percent;
+    // avaiable tier means max tier. tier starts from zero
     accts.global_state.available_tier = available_tier;
     Ok(())
 }
