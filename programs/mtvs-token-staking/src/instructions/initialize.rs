@@ -66,6 +66,7 @@ impl<'info> Initialize<'info> {
 pub fn handle(
     ctx: Context<Initialize>,
     new_authority: Pubkey,
+    treasury: Pubkey,
     tier_max_days: [u16; 10],
     tier_percent: [u16; 10],
     available_tier: u8,
@@ -73,6 +74,7 @@ pub fn handle(
     let accts = ctx.accounts;
     accts.global_state.is_initialized = 1;
     accts.global_state.authority = new_authority;
+    accts.global_state.treasury = treasury;
     accts.global_state.verify_nft_creator = accts.nft_creator.key();
     accts.global_state.mtvs_token_mint = accts.mtvs_token_mint.key();
     accts.global_state.tier_max_days = tier_max_days;

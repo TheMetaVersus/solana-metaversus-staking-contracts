@@ -14,6 +14,7 @@ export const initializeProgram = async (admin: User, mtvsMint: PublicKey) => {
   return await program.methods
     .initialize(
       admin.publicKey,
+      admin.publicKey,
       Constants.DEFAULT_TIER_DAYS,
       Constants.DEFAULT_TIER_PERCENT,
       Constants.DEFAULT_MAX_TIER
@@ -62,7 +63,7 @@ export const withdraw = async (admin: User, user: User, accts: Accounts) => {
   return await program.methods
     .withdraw()
     .accounts({
-      superAuthority: admin.publicKey,
+      treasury: admin.publicKey,
       user: user.publicKey,
       globalState: await keys.getGlobalStateKey(),
       pool: await keys.getPoolKey(),

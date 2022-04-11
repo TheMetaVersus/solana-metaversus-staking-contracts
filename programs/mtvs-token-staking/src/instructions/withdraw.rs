@@ -10,8 +10,8 @@ use anchor_spl::{
 /// so Claim Instruction should be prior to Withdraw instruction
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(mut, address = global_state.authority)]
-    pub super_authority: SystemAccount<'info>,
+    #[account(mut)]
+    pub treasury: SystemAccount<'info>,
 
     #[account(mut)]
     pub user: Signer<'info>,
@@ -20,6 +20,7 @@ pub struct Withdraw<'info> {
         mut,
         seeds = [GLOBAL_STATE_SEED],
         bump,
+        has_one = treasury
     )]
     pub global_state: Box<Account<'info, GlobalState>>,
 
@@ -35,7 +36,7 @@ pub struct Withdraw<'info> {
         seeds = [USER_STAKING_DATA_SEED, user_data.seed_key.as_ref(), user.key().as_ref()],
         bump,
         has_one = user,
-        close = super_authority
+        close = treasury
     )]
     pub user_data: Box<Account<'info, UserData>>,
 

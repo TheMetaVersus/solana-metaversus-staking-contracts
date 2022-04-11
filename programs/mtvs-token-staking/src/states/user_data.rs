@@ -28,19 +28,26 @@ impl UserData {
         let stake_duration = current_timestamp.checked_sub(self.staked_time).unwrap();
         
         // get tier of current stake duration
-        let tier = global_state
+        let mut tier = global_state
             .tier_max_days
             .iter()
             .position(|&x| stake_duration <= (x as u64).checked_mul(ONE_DAY).unwrap())
             .unwrap();
-        // invalid tier
-        require!(
-            tier as u8 <= global_state.available_tier,
-            StakingError::InvalidTier
-        );
+        
+        // If tier is 3 and max tier is 2, then tier should be 2.
+        tier = tier.min(global_state.available_tier as usize);
+
+        let locked_days = stake_duration.checked_div(ONE_DAY).unwrap();
+
         // get total reward from first stake time
         let total_reward = (self.amount as u128)
             .checked_mul(global_state.tier_percent[tier] as u128)
+            .unwrap()
+            //.checked_mul(stake_duration as u128)
+            //.unwrap()
+            //.checked_div(ONE_DAY as u128)
+            //.unwrap()
+            .checked_mul(locked_days as u128)
             .unwrap()
             .checked_div(REWARD_DENOMIATOR as u128)
             .unwrap();

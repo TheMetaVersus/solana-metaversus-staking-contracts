@@ -7,6 +7,8 @@ pub struct GlobalState {
     pub is_initialized: u8,
     // admin
     pub authority: Pubkey,
+    // treasury
+    pub treasury: Pubkey,
     // nft creator for verify
     pub verify_nft_creator: Pubkey,
     // token for staking

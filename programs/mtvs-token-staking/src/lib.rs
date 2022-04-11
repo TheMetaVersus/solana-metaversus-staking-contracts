@@ -7,7 +7,7 @@ pub mod states;
 
 use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("8evuSu8JcKmRR96RaLNDHjT7SteBnX69A4fzR2Nb8CFv");
 
 #[program]
 pub mod mtvs_token_staking {
@@ -16,6 +16,7 @@ pub mod mtvs_token_staking {
     pub fn initialize(
         ctx: Context<Initialize>,
         new_authority: Pubkey,
+        treasury: Pubkey,
         tier_max_days: [u16; 10],
         tier_percent: [u16; 10],
         available_tier: u8,
@@ -23,6 +24,7 @@ pub mod mtvs_token_staking {
         initialize::handle(
             ctx,
             new_authority,
+            treasury,
             tier_max_days,
             tier_percent,
             available_tier,
