@@ -13,4 +13,7 @@ pub enum StakingError {
 
     #[msg("Invalid Tier")]
     InvalidTier,
+
+    #[msg("Should be over minimum amount")]
+    InsufficientAmount,
 }

@@ -26,14 +26,14 @@ impl UserData {
     pub fn calc_rewards(&self, global_state: &GlobalState) -> Result<u64> {
         let current_timestamp = Clock::get()?.unix_timestamp as u64;
         let stake_duration = current_timestamp.checked_sub(self.staked_time).unwrap();
-        
+
         // get tier of current stake duration
         let mut tier = global_state
             .tier_max_days
             .iter()
             .position(|&x| stake_duration <= (x as u64).checked_mul(ONE_DAY).unwrap())
             .unwrap();
-        
+
         // If tier is 3 and max tier is 2, then tier should be 2.
         tier = tier.min(global_state.available_tier as usize);
 

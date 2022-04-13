@@ -130,14 +130,20 @@ impl<'info> Stake<'info> {
     }
 
     // validate NFT Collection and NFT ownership from metadata account
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self, amount: u64) -> Result<()> {
+        // check minimum amount
+        let deposit_minum = DEPOSIT_MINIMUM_AMOUNT
+            .checked_mul(10u64.checked_pow(self.mtvs_mint.decimals as u32).unwrap())
+            .unwrap();
+        require!(amount >= deposit_minum, StakingError::InsufficientAmount);
+        // check nft holding
         self.nft_hold
             .validate(self.user.key(), self.global_state.verify_nft_creator)?;
         Ok(())
     }
 }
 
-#[access_control(ctx.accounts.validate())]
+#[access_control(ctx.accounts.validate(amount))]
 pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 

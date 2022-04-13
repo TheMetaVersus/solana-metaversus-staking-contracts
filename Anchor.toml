@@ -19,7 +19,7 @@ mtvs_token_staking = "8evuSu8JcKmRR96RaLNDHjT7SteBnX69A4fzR2Nb8CFv"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "/root/.config/solana/id.json"
 
 [scripts]

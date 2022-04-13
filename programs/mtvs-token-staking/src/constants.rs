@@ -11,3 +11,7 @@ pub const ONE_DAY: u64 = 60 * 60; // in seconds
 
 // for reward calculation
 pub const REWARD_DENOMIATOR: u64 = 10000;
+
+// minimum amount to deposit
+// we should mul 10**decimals here
+pub const DEPOSIT_MINIMUM_AMOUNT: u64 = 100;
