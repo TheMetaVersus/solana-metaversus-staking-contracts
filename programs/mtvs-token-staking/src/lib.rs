@@ -7,7 +7,7 @@ pub mod states;
 
 use instructions::*;
 
-declare_id!("8evuSu8JcKmRR96RaLNDHjT7SteBnX69A4fzR2Nb8CFv");
+declare_id!("CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9");
 
 #[program]
 pub mod mtvs_token_staking {

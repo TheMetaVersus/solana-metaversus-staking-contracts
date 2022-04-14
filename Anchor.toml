@@ -10,10 +10,10 @@ address = "PwDiXFxQsGra4sFFTT8r1QWRMd4vfumiWC1jfWNfdYT"
 seeds = false
 
 [programs.localnet]
-mtvs_token_staking = "8evuSu8JcKmRR96RaLNDHjT7SteBnX69A4fzR2Nb8CFv"
+mtvs_token_staking = "CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9"
 
 [programs.devnet]
-mtvs_token_staking = "8evuSu8JcKmRR96RaLNDHjT7SteBnX69A4fzR2Nb8CFv"
+mtvs_token_staking = "CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9"
 
 [registry]
 url = "https://anchor.projectserum.com"
