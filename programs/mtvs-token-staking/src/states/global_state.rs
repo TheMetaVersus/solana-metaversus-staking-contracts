@@ -18,7 +18,7 @@ pub struct GlobalState {
     // total staked card count
     pub total_stake_card: u64,
     // totally harvested rewards
-    pub total_claimed_reward: u64,
+    pub total_claimed_reward: u128,
 
     // Rewards per tier
     // REWARD_DENOMIATOR is 10000
@@ -26,4 +26,7 @@ pub struct GlobalState {
     pub tier_percent: [u16; 10],
     pub tier_max_days: [u16; 10],
     pub available_tier: u8,
+
+    // reserved space
+    pub reserved: [u128; 4]
 }

@@ -20,6 +20,9 @@ pub struct UserData {
     pub seed_key: Pubkey,
     // totally claimed reward
     pub claimed_reward: u128,
+
+    // reserved space
+    pub reserved: [u128; 2]
 }
 
 impl UserData {

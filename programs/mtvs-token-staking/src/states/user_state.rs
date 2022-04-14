@@ -12,5 +12,8 @@ pub struct UserState {
     // total staked card count
     pub total_stake_card: u64,
     // totally harvested rewards
-    pub total_claimed_reward: u64,
+    pub total_claimed_reward: u128,
+
+    // reserved space
+    pub reserved: [u128; 3]
 }

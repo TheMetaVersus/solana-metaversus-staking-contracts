@@ -15,7 +15,7 @@ pub struct Initialize<'info> {
         bump,
         payer = authority,
     )]
-    pub global_state: Account<'info, GlobalState>,
+    pub global_state: Box<Account<'info, GlobalState>>,
 
     #[account(
         init_if_needed,
@@ -25,7 +25,7 @@ pub struct Initialize<'info> {
         token::authority = global_state,
         payer = authority
     )]
-    pub pool: Account<'info, TokenAccount>,
+    pub pool: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -35,12 +35,12 @@ pub struct Initialize<'info> {
         token::authority = global_state,
         payer = authority
     )]
-    pub reward_pool: Account<'info, TokenAccount>,
+    pub reward_pool: Box<Account<'info, TokenAccount>>,
 
     /// CHECK: This should a nft creator address.
     /// Can be both system account and or candy machine pda
     pub nft_creator: AccountInfo<'info>,
-    pub mtvs_token_mint: Account<'info, Mint>,
+    pub mtvs_token_mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,

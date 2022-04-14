@@ -97,14 +97,14 @@ pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
     accts.user_state.total_claimed_reward = accts
         .user_state
         .total_claimed_reward
-        .checked_add(reward_to_claim)
+        .checked_add(reward_to_claim as u128)
         .unwrap();
 
     // update total harvested reward in global state
     accts.global_state.total_claimed_reward = accts
         .global_state
         .total_claimed_reward
-        .checked_add(reward_to_claim)
+        .checked_add(reward_to_claim as u128)
         .unwrap();
 
     // transfer reward from pool to user

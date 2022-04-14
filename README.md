@@ -8,3 +8,4 @@
   staking reward will be our own spl token
 
 * Users should be able to stake/unstake at any time
+
