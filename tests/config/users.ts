@@ -1,8 +1,6 @@
 import { PublicKey, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
-import {
-  airdropSol
-} from "../utils/utils";
+import { airdropSol } from "../utils/utils";
 import { BaseAcct, ATA, NFTtokenAcc } from "./accounts";
 import { MtvsTokenStaking } from "../../target/types/mtvs_token_staking";
 const program = anchor.workspace
@@ -14,7 +12,7 @@ export class User {
   public provider: anchor.Provider;
   public data_seed: PublicKey;
   public tokenAccounts: {
-    mtvsAta: ATA
+    mtvsAta: ATA;
   };
   public nft: NFTtokenAcc;
   constructor(k: Keypair) {
@@ -37,9 +35,9 @@ export class User {
       this.keypair,
       mtvsMint,
       this.provider
-    )
+    );
   }
-  public async setNFT(key: PublicKey, mint: PublicKey,) {
+  public async setNFT(key: PublicKey, mint: PublicKey) {
     this.nft.publicKey = key;
     this.nft.mint = mint;
     this.nft.owner = this.publicKey;

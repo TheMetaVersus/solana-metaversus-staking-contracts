@@ -16,4 +16,7 @@ pub enum StakingError {
 
     #[msg("Should be over minimum amount")]
     InsufficientAmount,
+
+    #[msg("Incorrect User State")]
+    IncorrectUserState,
 }

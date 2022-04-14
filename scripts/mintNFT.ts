@@ -20,39 +20,62 @@ https://arweave.net/8QNsiFj-og21_KTJUsqjaFnuh_VexYFnYmem0mw5U20
 https://arweave.net/uVaO5z4fWESk61zhO1Mbz44fUymwFTGOnLdx45izeq8
 https://arweave.net/yIj7fGXwPeBWnXNctfyWpKi7nqwpFgqDLgEyMikBBv4
 */
-import { web3 } from '@project-serum/anchor';
-import { Keypair, 
-        PublicKey, 
-        SystemProgram,
-        Transaction,
-        TransactionInstruction,
-        sendAndConfirmTransaction,
-        Connection,
-        clusterApiUrl
-       } from '@solana/web3.js';
+import { web3 } from "@project-serum/anchor";
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  sendAndConfirmTransaction,
+  Connection,
+  clusterApiUrl,
+} from "@solana/web3.js";
 
 // for rest function
 import {
-  TOKEN_PROGRAM_ID, 
-  AccountLayout, 
+  TOKEN_PROGRAM_ID,
+  AccountLayout,
   MintLayout,
   createMint,
   createAccount,
-  mintTo
+  mintTo,
 } from "@solana/spl-token";
 
-let bs58 = require('bs58');
-import BN from 'bn.js';
-import { Data, updateMetadata, Creator, createMetadata, createMasterEdition, getMetadata } from '../tests/nft/metadata';
+let bs58 = require("bs58");
+import BN from "bn.js";
+import {
+  Data,
+  updateMetadata,
+  Creator,
+  createMetadata,
+  createMasterEdition,
+  getMetadata,
+} from "../tests/nft/metadata";
 
-const creator: Keypair = Keypair.fromSecretKey(bs58.decode("5cMBJTq18Bvsrsv4wZDA7J2smHbDPWgRsnLrFc2x5ZbeWrSfX2Ltftsw2Uc87ff5sfHa2iPfZMB9ch2117JyX7ki"));
+const creator: Keypair = Keypair.fromSecretKey(
+  bs58.decode(
+    "5cMBJTq18Bvsrsv4wZDA7J2smHbDPWgRsnLrFc2x5ZbeWrSfX2Ltftsw2Uc87ff5sfHa2iPfZMB9ch2117JyX7ki"
+  )
+);
 const connection = new Connection(clusterApiUrl("devnet"));
 
-const mintNewNFT = async (metadataUrl: string) : Promise<Array<PublicKey>>  => {
+const mintNewNFT = async (metadataUrl: string): Promise<Array<PublicKey>> => {
   // Create new token mint
-  const newMintKey = await createMint(connection, creator, creator.publicKey, null, 0);
+  const newMintKey = await createMint(
+    connection,
+    creator,
+    creator.publicKey,
+    null,
+    0
+  );
   console.log("mint created");
-  const nftAccount = await createAccount(connection, creator, newMintKey, creator.publicKey);
+  const nftAccount = await createAccount(
+    connection,
+    creator,
+    newMintKey,
+    creator.publicKey
+  );
   console.log("account created");
   await mintTo(connection, creator, newMintKey, nftAccount, creator, 1);
 
@@ -60,28 +83,28 @@ const mintNewNFT = async (metadataUrl: string) : Promise<Array<PublicKey>>  => {
 
   const creators = [
     new Creator({
-        address: creator.publicKey.toBase58(),
-        share: 100,
-        verified: true
+      address: creator.publicKey.toBase58(),
+      share: 100,
+      verified: true,
     }),
     new Creator({
-      address: 'JAwNgkoSRMJzMndLtxBVSVp3ZPUfw1MEJ5GaAQ2gWcDT',
+      address: "JAwNgkoSRMJzMndLtxBVSVp3ZPUfw1MEJ5GaAQ2gWcDT",
       share: 0,
-      verified: false
+      verified: false,
     }),
     new Creator({
-      address: '36gJMRpN2dTyYegNBtTa5RvndhWr7vPL91E7hV5zcQKA',
+      address: "36gJMRpN2dTyYegNBtTa5RvndhWr7vPL91E7hV5zcQKA",
       share: 0,
-      verified: false
+      verified: false,
     }),
   ];
-  
+
   let data = new Data({
     name: name,
     symbol: "MTVNFT",
     uri: metadataUrl,
     creators,
-    sellerFeeBasisPoints: 800
+    sellerFeeBasisPoints: 800,
   });
 
   let instructions: TransactionInstruction[] = [];
@@ -106,15 +129,11 @@ const mintNewNFT = async (metadataUrl: string) : Promise<Array<PublicKey>>  => {
   console.log("masteredition created");
   const transaction = new Transaction();
   transaction.add(...instructions);
-  let txHash = await sendAndConfirmTransaction(
-    connection,
-    transaction,
-    [creator],
-  );
+  let txHash = await sendAndConfirmTransaction(connection, transaction, [
+    creator,
+  ]);
   console.log(txHash);
-  return [
-    nftAccount, newMintKey
-  ];
+  return [nftAccount, newMintKey];
 };
 
 async function main() {
@@ -127,10 +146,10 @@ async function main() {
     "https://arweave.net/RpuJLV5wmhuR2WuVPLhBDupArtySg-GreN9YmyHma40",
     "https://arweave.net/8QNsiFj-og21_KTJUsqjaFnuh_VexYFnYmem0mw5U20",
     "https://arweave.net/uVaO5z4fWESk61zhO1Mbz44fUymwFTGOnLdx45izeq8",
-    "https://arweave.net/yIj7fGXwPeBWnXNctfyWpKi7nqwpFgqDLgEyMikBBv4"
+    "https://arweave.net/yIj7fGXwPeBWnXNctfyWpKi7nqwpFgqDLgEyMikBBv4",
   ];
-  metaList.forEach(async meta => {
+  metaList.forEach(async (meta) => {
     await mintNewNFT(meta);
-  })
+  });
 }
 main();

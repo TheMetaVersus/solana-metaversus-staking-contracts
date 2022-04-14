@@ -4,9 +4,10 @@ import {
   USER_STAKING_DATA_SEED,
   POOL_SEED,
   REWARD_POOL_SEED,
+  USER_STATE_SEED,
 } from "./constants";
 import { asyncGetPda } from "./utils";
-import { getProgram } from '../program';
+import { getProgram } from "../program";
 
 const program = getProgram();
 export const getGlobalStateKey = async () => {
@@ -33,10 +34,25 @@ export const getRewardPoolKey = async () => {
   return rewardPoolKey;
 };
 
-export const getUserDataKey = async (userKey: PublicKey, seedKey: PublicKey) => {
+export const getUserDataKey = async (
+  userKey: PublicKey,
+  seedKey: PublicKey
+) => {
   const [userDataKey] = await asyncGetPda(
-    [Buffer.from(USER_STAKING_DATA_SEED), seedKey.toBuffer(), userKey.toBuffer()],
+    [
+      Buffer.from(USER_STAKING_DATA_SEED),
+      seedKey.toBuffer(),
+      userKey.toBuffer(),
+    ],
     program.programId
   );
   return userDataKey;
+};
+
+export const getUserStateKey = async (userKey: PublicKey) => {
+  const [userStateKey] = await asyncGetPda(
+    [Buffer.from(USER_STATE_SEED), userKey.toBuffer()],
+    program.programId
+  );
+  return userStateKey;
 };

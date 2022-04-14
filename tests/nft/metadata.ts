@@ -3,17 +3,17 @@ import {
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
-} from '@solana/web3.js';
-import { programIds } from './utils';
-import { serialize } from 'borsh';
+} from "@solana/web3.js";
+import { programIds } from "./utils";
+import { serialize } from "borsh";
 
-import {extendBorsh} from './borsh';
+import { extendBorsh } from "./borsh";
 extendBorsh();
-import BN from 'bn.js';
-import { StringPublicKey, toPublicKey } from './utils';
-export const METADATA_PREFIX = 'metadata';
-export const EDITION = 'edition';
-export const RESERVATION = 'reservation';
+import BN from "bn.js";
+import { StringPublicKey, toPublicKey } from "./utils";
+export const METADATA_PREFIX = "metadata";
+export const EDITION = "edition";
+export const RESERVATION = "reservation";
 
 export const MAX_NAME_LENGTH = 32;
 
@@ -51,11 +51,11 @@ export enum MetadataKey {
 }
 
 export enum MetadataCategory {
-  Audio = 'audio',
-  Video = 'video',
-  Image = 'image',
-  VR = 'vr',
-  HTML = 'html',
+  Audio = "audio",
+  Video = "video",
+  Image = "image",
+  VR = "vr",
+  HTML = "html",
 }
 
 export type MetadataFile = {
@@ -159,7 +159,7 @@ export class EditionMarker {
     const indexOffset = Math.floor(editionOffset / 8);
 
     if (indexOffset > 30) {
-      throw Error('bad index for edition');
+      throw Error("bad index for edition");
     }
 
     const positionInBitsetFromRight = 7 - (editionOffset % 8);
@@ -267,7 +267,7 @@ export class Metadata {
             toPublicKey(this.mint).toBuffer(),
             new Uint8Array([this.editionNonce || 0]),
           ],
-          metadata,
+          metadata
         )
       ).toBase58();
     } else {
@@ -325,23 +325,23 @@ export const METADATA_SCHEMA = new Map<any, any>([
   [
     CreateMetadataArgs,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['instruction', 'u8'],
-        ['data', Data],
-        ['isMutable', 'u8'], // bool
+        ["instruction", "u8"],
+        ["data", Data],
+        ["isMutable", "u8"], // bool
       ],
     },
   ],
   [
     UpdateMetadataArgs,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['instruction', 'u8'],
-        ['data', { kind: 'option', type: Data }],
-        ['updateAuthority', { kind: 'option', type: 'pubkeyAsString' }],
-        ['primarySaleHappened', { kind: 'option', type: 'u8' }],
+        ["instruction", "u8"],
+        ["data", { kind: "option", type: Data }],
+        ["updateAuthority", { kind: "option", type: "pubkeyAsString" }],
+        ["primarySaleHappened", { kind: "option", type: "u8" }],
       ],
     },
   ],
@@ -349,109 +349,109 @@ export const METADATA_SCHEMA = new Map<any, any>([
   [
     CreateMasterEditionArgs,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['instruction', 'u8'],
-        ['maxSupply', { kind: 'option', type: 'u64' }],
+        ["instruction", "u8"],
+        ["maxSupply", { kind: "option", type: "u64" }],
       ],
     },
   ],
   [
     MintPrintingTokensArgs,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['instruction', 'u8'],
-        ['supply', 'u64'],
+        ["instruction", "u8"],
+        ["supply", "u64"],
       ],
     },
   ],
   [
     MasterEditionV1,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['key', 'u8'],
-        ['supply', 'u64'],
-        ['maxSupply', { kind: 'option', type: 'u64' }],
-        ['printingMint', 'pubkeyAsString'],
-        ['oneTimePrintingAuthorizationMint', 'pubkeyAsString'],
+        ["key", "u8"],
+        ["supply", "u64"],
+        ["maxSupply", { kind: "option", type: "u64" }],
+        ["printingMint", "pubkeyAsString"],
+        ["oneTimePrintingAuthorizationMint", "pubkeyAsString"],
       ],
     },
   ],
   [
     MasterEditionV2,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['key', 'u8'],
-        ['supply', 'u64'],
-        ['maxSupply', { kind: 'option', type: 'u64' }],
+        ["key", "u8"],
+        ["supply", "u64"],
+        ["maxSupply", { kind: "option", type: "u64" }],
       ],
     },
   ],
   [
     Edition,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['key', 'u8'],
-        ['parent', 'pubkeyAsString'],
-        ['edition', 'u64'],
+        ["key", "u8"],
+        ["parent", "pubkeyAsString"],
+        ["edition", "u64"],
       ],
     },
   ],
   [
     Data,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['name', 'string'],
-        ['symbol', 'string'],
-        ['uri', 'string'],
-        ['sellerFeeBasisPoints', 'u16'],
-        ['creators', { kind: 'option', type: [Creator] }],
+        ["name", "string"],
+        ["symbol", "string"],
+        ["uri", "string"],
+        ["sellerFeeBasisPoints", "u16"],
+        ["creators", { kind: "option", type: [Creator] }],
       ],
     },
   ],
   [
     Creator,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['address', 'pubkeyAsString'],
-        ['verified', 'u8'],
-        ['share', 'u8'],
+        ["address", "pubkeyAsString"],
+        ["verified", "u8"],
+        ["share", "u8"],
       ],
     },
   ],
   [
     Metadata,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['key', 'u8'],
-        ['updateAuthority', 'pubkeyAsString'],
-        ['mint', 'pubkeyAsString'],
-        ['data', Data],
-        ['primarySaleHappened', 'u8'], // bool
-        ['isMutable', 'u8'], // bool
+        ["key", "u8"],
+        ["updateAuthority", "pubkeyAsString"],
+        ["mint", "pubkeyAsString"],
+        ["data", Data],
+        ["primarySaleHappened", "u8"], // bool
+        ["isMutable", "u8"], // bool
       ],
     },
   ],
   [
     EditionMarker,
     {
-      kind: 'struct',
+      kind: "struct",
       fields: [
-        ['key', 'u8'],
-        ['ledger', [31]],
+        ["key", "u8"],
+        ["ledger", [31]],
       ],
     },
   ],
 ]);
 export async function getMetadata(
-  tokenMint: StringPublicKey,
+  tokenMint: StringPublicKey
 ): Promise<StringPublicKey> {
   const PROGRAM_IDS = programIds();
 
@@ -462,13 +462,13 @@ export async function getMetadata(
         toPublicKey(PROGRAM_IDS.metadata).toBuffer(),
         toPublicKey(tokenMint).toBuffer(),
       ],
-      toPublicKey(PROGRAM_IDS.metadata),
+      toPublicKey(PROGRAM_IDS.metadata)
     )
   )[0].toBase58();
 }
 
 // eslint-disable-next-line no-control-regex
-const METADATA_REPLACE = new RegExp('\u0000', 'g');
+const METADATA_REPLACE = new RegExp("\u0000", "g");
 
 export async function updateMetadata(
   data: Data | undefined,
@@ -477,15 +477,15 @@ export async function updateMetadata(
   mintKey: StringPublicKey,
   updateAuthority: StringPublicKey,
   instructions: TransactionInstruction[],
-  metadataAccount?: StringPublicKey,
+  metadataAccount?: StringPublicKey
 ) {
   const metadataProgramId = programIds().metadata;
   if (metadataAccount === undefined) {
     console.error("metadataAccount is undefined!");
     return;
   }
-  
-/*
+
+  /*
   metadataAccount =
     metadataAccount ||
     (
@@ -525,7 +525,7 @@ export async function updateMetadata(
       keys,
       programId: toPublicKey(metadataProgramId),
       data: txnData,
-    }),
+    })
   );
 
   return metadataAccount;
@@ -537,18 +537,18 @@ export async function createMetadata(
   mintKey: StringPublicKey,
   mintAuthorityKey: StringPublicKey,
   instructions: TransactionInstruction[],
-  payer: StringPublicKey,
+  payer: StringPublicKey
 ) {
   const metadataProgramId = programIds().metadata;
 
   const metadataAccount = (
     await PublicKey.findProgramAddress(
       [
-        Buffer.from('metadata'),
+        Buffer.from("metadata"),
         toPublicKey(metadataProgramId).toBuffer(),
         toPublicKey(mintKey).toBuffer(),
       ],
-      toPublicKey(metadataProgramId),
+      toPublicKey(metadataProgramId)
     )
   )[0];
   const value = new CreateMetadataArgs({ data, isMutable: true });
@@ -596,13 +596,11 @@ export async function createMetadata(
       keys,
       programId: toPublicKey(metadataProgramId),
       data: txnData,
-    }),
+    })
   );
 
   return metadataAccount;
 }
-
-
 
 export async function createMasterEdition(
   maxSupply: BN | undefined,
@@ -610,7 +608,7 @@ export async function createMasterEdition(
   updateAuthorityKey: StringPublicKey,
   mintAuthorityKey: StringPublicKey,
   payer: StringPublicKey,
-  instructions: TransactionInstruction[],
+  instructions: TransactionInstruction[]
 ) {
   const metadataProgramId = programIds().metadata;
 
@@ -621,7 +619,7 @@ export async function createMasterEdition(
         toPublicKey(metadataProgramId).toBuffer(),
         toPublicKey(mintKey).toBuffer(),
       ],
-      toPublicKey(metadataProgramId),
+      toPublicKey(metadataProgramId)
     )
   )[0];
 
@@ -633,7 +631,7 @@ export async function createMasterEdition(
         toPublicKey(mintKey).toBuffer(),
         Buffer.from(EDITION),
       ],
-      toPublicKey(metadataProgramId),
+      toPublicKey(metadataProgramId)
     )
   )[0];
 
@@ -694,6 +692,6 @@ export async function createMasterEdition(
       keys,
       programId: toPublicKey(metadataProgramId),
       data,
-    }),
+    })
   );
 }

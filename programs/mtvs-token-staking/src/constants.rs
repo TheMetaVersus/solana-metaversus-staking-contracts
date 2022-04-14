@@ -3,6 +3,8 @@ pub const USER_STAKING_DATA_SEED: &[u8] = b"USER_STAKING_DATA_SEED";
 pub const POOL_SEED: &[u8] = b"POOL_SEED";
 pub const REWARD_POOL_SEED: &[u8] = b"REWARD_POOL_SEED";
 
+pub const USER_STATE_SEED: &[u8] = b"USER_STATE_SEED";
+
 // for day calculation
 //pub const ONE_DAY: u64 = 60 * 60 * 24; // in seconds
 

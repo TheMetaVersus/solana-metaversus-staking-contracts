@@ -31,6 +31,14 @@ pub struct ClaimReward<'info> {
     )]
     pub user_data: Box<Account<'info, UserData>>,
 
+    #[account(
+        mut,
+        seeds = [USER_STATE_SEED, user.key().as_ref()],
+        bump,
+        has_one = user
+    )]
+    pub user_state: Box<Account<'info, UserState>>,
+
     pub nft_hold: NftHold<'info>,
 
     #[account(
@@ -84,6 +92,13 @@ pub fn handle(ctx: Context<ClaimReward>) -> Result<()> {
         .checked_add(reward_to_claim as u128)
         .unwrap();
     accts.user_data.last_reward_time = timestamp as u64;
+
+    // update total harvested reward in user state
+    accts.user_state.total_claimed_reward = accts
+        .user_state
+        .total_claimed_reward
+        .checked_add(reward_to_claim)
+        .unwrap();
 
     // update total harvested reward in global state
     accts.global_state.total_claimed_reward = accts

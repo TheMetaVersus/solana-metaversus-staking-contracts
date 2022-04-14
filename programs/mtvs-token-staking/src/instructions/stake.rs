@@ -33,6 +33,14 @@ pub struct Stake<'info> {
     )]
     pub user_data: Box<Account<'info, UserData>>,
 
+    #[account(
+        init_if_needed,
+        seeds = [USER_STATE_SEED, user.key().as_ref()],
+        bump,
+        payer = user
+    )]
+    pub user_state: Box<Account<'info, UserState>>,
+
     /// CHECK: This is a random keypair for generating user_data
     pub data_seed: AccountInfo<'info>,
 
@@ -136,6 +144,13 @@ impl<'info> Stake<'info> {
             .checked_mul(10u64.checked_pow(self.mtvs_mint.decimals as u32).unwrap())
             .unwrap();
         require!(amount >= deposit_minum, StakingError::InsufficientAmount);
+        // check if userState is inited to avoid re-initialization attack
+        if self.user_state.is_initialized == 1 {
+            require!(
+                self.user_state.user.eq(&self.user.key()),
+                StakingError::IncorrectUserState
+            );
+        }
         // check nft holding
         self.nft_hold
             .validate(self.user.key(), self.global_state.verify_nft_creator)?;
@@ -157,6 +172,23 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
     accts.user_data.last_reward_time = timestamp as u64;
     accts.user_data.seed_key = accts.data_seed.key();
 
+    // update user_state
+    accts.user_state.is_initialized = 1;
+    accts.user_state.user = accts.user.key();
+    // add totally staked amount
+    accts.user_state.total_staked_amount = accts
+        .user_state
+        .total_staked_amount
+        .checked_add(amount)
+        .unwrap();
+    // increase totally staked card count
+    accts.user_state.total_stake_card = accts
+        .user_state
+        .total_stake_card
+        .checked_add(1)
+        .unwrap();
+
+    // global state
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
         .global_state
@@ -164,7 +196,11 @@ pub fn handle(ctx: Context<Stake>, amount: u64) -> Result<()> {
         .checked_add(amount)
         .unwrap();
     // Update totally staked card in global_state
-    accts.global_state.total_stake_card += 1;
+    accts.global_state.total_stake_card = accts
+    .global_state
+    .total_stake_card
+    .checked_add(1)
+    .unwrap();
     // transfer stake amount to pool
     token::transfer(accts.stake_token_context(), amount)?;
 

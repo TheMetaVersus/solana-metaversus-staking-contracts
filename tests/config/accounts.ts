@@ -1,10 +1,5 @@
-
-import {
-  PublicKey,
-  Keypair,
-  Transaction
-} from '@solana/web3.js';
-import * as anchor from '@project-serum/anchor';
+import { PublicKey, Keypair, Transaction } from "@solana/web3.js";
+import * as anchor from "@project-serum/anchor";
 import {
   // @ts-ignore
   createAssociatedTokenAccountInstruction,
@@ -12,18 +7,19 @@ import {
   mintTo,
   createMint,
   createAccount,
-  createAssociatedTokenAccount
+  createAssociatedTokenAccount,
 } from "@solana/spl-token";
 import {
   getGlobalStateKey,
   getPoolKey,
   getRewardPoolKey,
-  getUserDataKey
-} from '../utils/keys';
-import { getMetadata } from '../nft/metadata';
-import { MtvsTokenStaking } from '../../target/types/mtvs_token_staking';
-import { User } from './users';
-const program = anchor.workspace.MtvsTokenStaking as anchor.Program<MtvsTokenStaking>;
+  getUserDataKey,
+} from "../utils/keys";
+import { getMetadata } from "../nft/metadata";
+import { MtvsTokenStaking } from "../../target/types/mtvs_token_staking";
+import { User } from "./users";
+const program = anchor.workspace
+  .MtvsTokenStaking as anchor.Program<MtvsTokenStaking>;
 
 export class BaseAcct {
   public publicKey: PublicKey;
@@ -32,15 +28,19 @@ export class TokenAcc extends BaseAcct {
   public mint: PublicKey;
   public owner: PublicKey;
 
-  public async initTokenAccount(owner: Keypair, mint: PublicKey, provider?: anchor.Provider) {
+  public async initTokenAccount(
+    owner: Keypair,
+    mint: PublicKey,
+    provider?: anchor.Provider
+  ) {
     this.mint = mint;
     this.owner = owner.publicKey;
     if (provider) {
       this.publicKey = await createAccount(
         provider.connection,
-        owner, 
+        owner,
         mint,
-        owner.publicKey,
+        owner.publicKey
       );
     }
   }
@@ -54,7 +54,11 @@ export class NFTtokenAcc extends TokenAcc {
   }
 }
 export class ATA extends TokenAcc {
-  public async initTokenAccount(owner: Keypair, mint: PublicKey, provider?: anchor.Provider): Promise<void> {
+  public async initTokenAccount(
+    owner: Keypair,
+    mint: PublicKey,
+    provider?: anchor.Provider
+  ): Promise<void> {
     this.mint = mint;
     this.owner = owner.publicKey;
     if (provider) {
@@ -65,14 +69,19 @@ export class ATA extends TokenAcc {
         owner.publicKey
       );
     }
-  }  
+  }
 }
 
 export class MintAcc extends BaseAcct {
   public mint_authority: PublicKey;
   public freeze_authority: PublicKey;
 
-  public async createMint(provider: anchor.Provider, payer: Keypair, authority: PublicKey, decimals: number) {
+  public async createMint(
+    provider: anchor.Provider,
+    payer: Keypair,
+    authority: PublicKey,
+    decimals: number
+  ) {
     this.mint_authority = authority;
     this.publicKey = await createMint(
       provider.connection,
@@ -82,8 +91,13 @@ export class MintAcc extends BaseAcct {
       decimals
     );
   }
-  public async mintTokens(provider: anchor.Provider, payer: Keypair, toTokenAcc: PublicKey, amount: number) {
-    console.log('toTokenAcc =', toTokenAcc.toBase58());
+  public async mintTokens(
+    provider: anchor.Provider,
+    payer: Keypair,
+    toTokenAcc: PublicKey,
+    amount: number
+  ) {
+    console.log("toTokenAcc =", toTokenAcc.toBase58());
     await mintTo(
       provider.connection,
       payer,

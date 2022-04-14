@@ -38,7 +38,15 @@ pub struct Withdraw<'info> {
         has_one = user,
         close = treasury
     )]
-    pub user_data: Box<Account<'info, UserData>>,
+    pub user_data: Box<Account<'info, UserData>>,    
+    
+    #[account(
+        mut,
+        seeds = [USER_STATE_SEED, user.key().as_ref()],
+        bump,
+        has_one = user
+    )]
+    pub user_state: Box<Account<'info, UserState>>,
 
     pub nft_hold: NftHold<'info>,
 
@@ -81,6 +89,21 @@ impl<'info> Withdraw<'info> {
 pub fn handle(ctx: Context<Withdraw>) -> Result<()> {
     let accts = ctx.accounts;
     let amount = accts.user_data.amount;
+
+    // update user data
+    // add totally staked amount
+    accts.user_state.total_staked_amount = accts
+        .user_state
+        .total_staked_amount
+        .checked_sub(amount)
+        .unwrap();
+    // increase totally staked card count
+    accts.user_state.total_stake_card = accts
+        .user_state
+        .total_stake_card
+        .checked_sub(1)
+        .unwrap();
+
     // Update totally staked amount in global_state
     accts.global_state.total_staked_amount = accts
         .global_state
@@ -89,7 +112,11 @@ pub fn handle(ctx: Context<Withdraw>) -> Result<()> {
         .unwrap();
 
     // Update card count
-    accts.global_state.total_stake_card -= 1;
+    accts.global_state.total_stake_card = accts
+        .global_state
+        .total_stake_card
+        .checked_sub(1)
+        .unwrap();
 
     // transfer stake amount to pool
     let bump = ctx.bumps.get("global_state").unwrap();
