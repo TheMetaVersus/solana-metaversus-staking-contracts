@@ -8,7 +8,6 @@ pub mod states;
 use instructions::*;
 
 declare_id!("CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9");
-
 #[program]
 pub mod mtvs_token_staking {
     use super::*;
@@ -41,5 +40,13 @@ pub mod mtvs_token_staking {
 
     pub fn claim_reward(ctx: Context<ClaimReward>) -> Result<()> {
         claim_reward::handle(ctx)
+    }
+
+    pub fn add_reward(ctx: Context<RewardManagement>, amount: u64) -> Result<()> {
+        add_reward::handle(ctx, amount)
+    }
+
+    pub fn remove_reward(ctx: Context<RewardManagement>, amount: u64) -> Result<()> {
+        remove_reward::handle(ctx, amount)
     }
 }

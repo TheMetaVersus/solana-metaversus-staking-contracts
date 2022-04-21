@@ -21,6 +21,8 @@ import {
   stake,
   withdraw,
   claimReward,
+  addReward,
+  removeReward,
 } from "./utils/instructions";
 import { mintNewNFT } from "./nft/mint";
 import { getRewardPoolKey } from "./utils/keys";
@@ -123,8 +125,14 @@ describe("mtvs-token-staking", function () {
     console.log("Your transaction signature", tx);
   });
 
-  it("Withdraw tokens", async () => {
-    const tx = await withdraw(users.admin, users.test, accts);
+  it("Add Rewards - ADMIN", async () => {
+    const tx = await addReward(users.admin, accts, new anchor.BN(100000));
     console.log("Your transaction signature", tx);
   });
+
+  it("Remove Rewards - ADMIN", async () => {
+    const tx = await removeReward(users.admin, accts, new anchor.BN(100000));
+    console.log("Your transaction signature", tx);
+  });
+
 });

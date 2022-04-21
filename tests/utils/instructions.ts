@@ -258,6 +258,50 @@ export const claimReward = async (user: User, accts: Accounts) => {
   return txHash;
 };
 
+export const addReward = async (user: User, accts: Accounts, amount: anchor.BN) => {
+  const globalKey = await keys.getGlobalStateKey()
+
+  const txHash = await program.methods
+    .addReward(amount)
+    .accounts({
+      admin: user.publicKey,
+      globalState: globalKey,
+      rewardPool: await keys.getRewardPoolKey(),
+      rewardTokenAcc: user.tokenAccounts.mtvsAta.publicKey,
+      mtvsMint: accts.mtvsTokenMint.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+      rent: SYSVAR_RENT_PUBKEY,
+    })
+    .signers([user.keypair])
+    .rpc();
+
+  return txHash;
+};
+
+export const removeReward = async (user: User, accts: Accounts, amount: anchor.BN) => {
+  const globalKey = await keys.getGlobalStateKey()
+
+  const txHash = await program.methods
+    .removeReward(amount)
+    .accounts({
+      admin: user.publicKey,
+      globalState: globalKey,
+      rewardPool: await keys.getRewardPoolKey(),
+      rewardTokenAcc: user.tokenAccounts.mtvsAta.publicKey,
+      mtvsMint: accts.mtvsTokenMint.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+      rent: SYSVAR_RENT_PUBKEY,
+    })
+    .signers([user.keypair])
+    .rpc();
+
+  return txHash;
+};
+
 export const fetchData = async (type: string, key: PublicKey) => {
   return await program.account[type].fetchNullable(key);
 };
