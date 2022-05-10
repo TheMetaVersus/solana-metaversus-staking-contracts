@@ -7,7 +7,7 @@ pub mod states;
 
 use instructions::*;
 
-declare_id!("CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9");
+declare_id!("BB2vBh1MYrAAobYv69hVEFrMCeAKFEuErHiMMf4ejcJo");
 #[program]
 pub mod mtvs_token_staking {
     use super::*;
@@ -48,5 +48,35 @@ pub mod mtvs_token_staking {
 
     pub fn remove_reward(ctx: Context<RewardManagement>, amount: u64) -> Result<()> {
         remove_reward::handle(ctx, amount)
+    }
+
+    pub fn transfer_ownership(ctx: Context<TransferOwnership>, new_admin: Pubkey) -> Result<()> {
+        transfer_ownership::handle(ctx, new_admin)
+    }
+
+    pub fn change_treasury(ctx: Context<ChangeTreasury>, treasury: Pubkey) -> Result<()> {
+        change_treasury::handle(ctx, treasury)
+    }
+
+    pub fn change_token_mint(ctx: Context<ChangeTokenMint>, token_mint: Pubkey) -> Result<()> {
+        change_token_mint::handle(ctx, token_mint)
+    }
+
+    pub fn change_creator(ctx: Context<ChangeCreator>, creator: Pubkey) -> Result<()> {
+        change_creator::handle(ctx, creator)
+    }
+
+    pub fn change_tier_setting(
+        ctx: Context<ChangeTierSetting>,
+        tier_max_days: [u16; 10],
+        tier_percent: [u16; 10],
+        available_tier: u8,
+    ) -> Result<()> {
+        change_tier_setting::handle(
+            ctx, 
+            tier_max_days,
+            tier_percent,
+            available_tier
+        )
     }
 }

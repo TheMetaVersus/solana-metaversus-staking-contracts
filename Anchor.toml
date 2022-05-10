@@ -10,16 +10,16 @@ address = "PwDiXFxQsGra4sFFTT8r1QWRMd4vfumiWC1jfWNfdYT"
 seeds = false
 
 [programs.localnet]
-mtvs_token_staking = "CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9"
+mtvs_token_staking = "BB2vBh1MYrAAobYv69hVEFrMCeAKFEuErHiMMf4ejcJo"
 
 [programs.devnet]
-mtvs_token_staking = "CTgpJjUJ59dAQbh9iwD1JGh94hdi6sLXP911YamvbJS9"
+mtvs_token_staking = "BB2vBh1MYrAAobYv69hVEFrMCeAKFEuErHiMMf4ejcJo"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "/root/.config/solana/id.json"
 
 [scripts]

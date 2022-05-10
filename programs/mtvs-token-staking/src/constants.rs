@@ -6,10 +6,10 @@ pub const REWARD_POOL_SEED: &[u8] = b"REWARD_POOL_SEED";
 pub const USER_STATE_SEED: &[u8] = b"USER_STATE_SEED";
 
 // for day calculation
-//pub const ONE_DAY: u64 = 60 * 60 * 24; // in seconds
+pub const ONE_DAY: u64 = 60 * 60 * 24; // in seconds
 
 // todo: for test, it should be one hour
-pub const ONE_DAY: u64 = 60 * 60; // in seconds
+//pub const ONE_DAY: u64 = 60 * 60; // in seconds
 
 // for reward calculation
 pub const REWARD_DENOMIATOR: u64 = 10000;
